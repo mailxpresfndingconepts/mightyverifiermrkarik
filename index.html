@@ -7,361 +7,193 @@
 <style>
   :root{
     --bg:#0b0b0b;
-    --card:#0f0f10;
     --muted:#bdbdbd;
     --accent:#7be0a6;
   }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
   body{
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02)), url('#mkarik-svg');
-    background-color: var(--bg);
+    background:#0b0b0b;
     color:#fff;
+    margin:0;
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
     display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:28px;
-    box-sizing:border-box;
+    height:100vh;
+    overflow:hidden;
+  }
+  .sidebar{
+    width:280px;
+    background:#111;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    border-right:1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar h2{font-size:16px;margin:0 0 8px 0;}
+  textarea{
+    flex:1;
+    resize:none;
+    width:100%;
+    min-height:200px;
+    background:#0b0b0b;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:8px;
+    padding:10px;
+    color:#fff;
+    font-family:monospace;
+    font-size:13px;
   }
   .app{
-    width:980px;
-    max-width:96%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:14px;
-    padding:26px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-    position:relative;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,0.03);
+    flex:1;
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
   }
-  header{display:flex;align-items:center;gap:16px;margin-bottom:18px;}
-  .logo-wrap{
-    width:86px;height:86px;border-radius:12px;background:#fff;padding:10px;display:flex;align-items:center;justify-content:center;
-  }
+  header{margin-bottom:18px;}
   .title{font-size:20px;font-weight:700;}
   .subtitle{color:var(--muted);font-size:13px;margin-top:4px;}
   .controls{display:flex;gap:12px;align-items:center;margin:12px 0 18px;}
   .btn{
-    background:transparent;border:1px solid rgba(255,255,255,0.08);padding:10px 14px;border-radius:9px;color:#fff;font-weight:600;cursor:pointer;
+    background:transparent;border:1px solid rgba(255,255,255,0.08);
+    padding:10px 14px;border-radius:9px;color:#fff;font-weight:600;cursor:pointer;
   }
   .btn.primary{background:linear-gradient(90deg,#12c37a,#7be0a6);color:#021208;border:none;}
-  .info{background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;color:var(--muted);font-size:13px;}
-  .status{margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;}
-  .card{background:rgba(255,255,255,0.02);padding:14px;border-radius:10px;min-width:140px;text-align:center}
+  .info{color:var(--muted);font-size:12px;margin-left:auto}
+  .status{display:flex;gap:12px;flex-wrap:wrap}
+  .card{background:#111;padding:14px;border-radius:10px;min-width:140px;text-align:center}
   .big{font-size:20px;font-weight:700}
   .muted{color:var(--muted);font-size:13px}
-  .progressbar{height:12px;background:rgba(255,255,255,0.04);border-radius:8px;overflow:hidden;margin-top:10px}
+  .progressbar{height:12px;background:rgba(255,255,255,0.04);border-radius:8px;overflow:hidden;margin-top:6px}
   .progressbar > i{display:block;height:100%;background:linear-gradient(90deg,#12c37a,#7be0a6);width:0%}
-  footer{margin-top:18px;color:var(--muted);font-size:12px}
-  /* Background SVG container (invisible, used as data URL) */
-  svg{display:none}
-  /* small helpers */
-  .small{font-size:12px}
-  input[type=file]{display:none}
-  label.upload{
-    display:inline-flex;align-items:center;gap:8px;border-radius:9px;padding:10px 14px;border:1px dashed rgba(255,255,255,0.06);cursor:pointer;color:var(--muted)
-  }
 </style>
 </head>
 <body>
-  <!-- Inline SVG used as background (black & white logo for "Mr Karik the hacker") -->
-  <svg id="mkarik-svg" xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
-    <rect width="100%" height="100%" fill="#0b0b0b"/>
-    <!-- Logo: stylized MK monogram + "Mr Karik the hacker" in simple monospaced style -->
-    <g transform="translate(120,120)" fill="#ffffff" opacity="0.08">
-      <!-- Big monogram -->
-      <path d="M200 40 L300 40 Q330 40 330 72 L330 228 Q330 260 300 260 L200 260 Q170 260 170 228 L170 72 Q170 40 200 40 Z M230 72 L270 72 Q282 72 282 84 L282 196 Q282 208 270 208 L230 208 Q218 208 218 196 L218 84 Q218 72 230 72 Z" />
-      <!-- Right-side hacker glyph: a simple mask-like icon -->
-      <path d="M420 80 C440 60 500 40 540 80 C580 120 560 220 480 240 C440 250 420 180 420 140 C420 120 430 100 420 80 Z" />
-      <!-- Type -->
-      <text x="30" y="360" font-family="monospace" font-size="36" fill="#fff" opacity="0.14">Mr Karik</text>
-      <text x="32" y="396" font-family="monospace" font-size="14" fill="#fff" opacity="0.09">the hacker</text>
-    </g>
-  </svg>
+  <!-- Sidebar for manual paste -->
+  <aside class="sidebar">
+    <h2>Paste Emails</h2>
+    <textarea id="pasteBox" placeholder="Paste emails here (one per line)..."></textarea>
+    <small style="color:var(--muted)">These will be combined with uploaded list.</small>
+  </aside>
 
-  <div class="app" role="main" aria-labelledby="appTitle">
+  <!-- Main app -->
+  <div class="app">
     <header>
-      <div class="logo-wrap" aria-hidden="true">
-        <!-- Inline simple B/W SVG as logo (visible in UI) -->
-        <svg width="64" height="64" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-          <rect width="120" height="120" rx="14" fill="#000" />
-          <g fill="#fff" transform="translate(14,18)">
-            <path d="M22 6 L40 6 Q44 6 44 10 L44 44 Q44 48 40 48 L22 48 Q18 48 18 44 L18 10 Q18 6 22 6 Z" />
-            <path d="M62 12 C68 8 82 4 96 12 C110 20 106 44 86 52 C76 56 66 44 62 32 C60 26 62 18 62 12 Z" />
-          </g>
-        </svg>
-      </div>
-      <div>
-        <div id="appTitle" class="title">Email Verifier</div>
-        <div class="subtitle">Client-side MX/DNS verification • Filters Google & Microsoft providers • Exports verified list</div>
-      </div>
+      <div class="title">Email Verifier</div>
+      <div class="subtitle">Upload list + Paste emails • Filters Google/Microsoft • Exports verified .txt</div>
     </header>
 
     <div class="controls">
-      <label class="upload" title="Upload a .txt list of emails">
-        <input id="fileInput" type="file" accept=".txt">
-        📁 Upload list
+      <label class="btn">
+        <input id="fileInput" type="file" accept=".txt" style="display:none">📁 Upload list
       </label>
-
-      <button id="startBtn" class="btn primary" title="Start verification">Start Verification</button>
+      <button id="startBtn" class="btn primary">Start Verification</button>
       <button id="downloadBtn" class="btn" disabled>Download Verified (.txt)</button>
-
-      <div style="flex:1"></div>
-
-      <div class="info small">
-        <strong>Privacy note:</strong> DNS MX lookups are performed via public DNS-over-HTTPS endpoints (Google/Cloudflare). Only domain names are sent for MX resolution (no SMTP probing). If this is a concern, run a local verifier on your server instead.
-      </div>
+      <div class="info">Uses DNS-over-HTTPS MX checks</div>
     </div>
 
     <div class="status">
-      <div class="card">
-        <div class="muted">Uploaded addresses</div>
-        <div id="countUploaded" class="big">0</div>
-      </div>
-
-      <div class="card">
-        <div class="muted">Filtered (removed Google/Microsoft)</div>
-        <div id="countFiltered" class="big">0</div>
-      </div>
-
-      <div class="card">
-        <div class="muted">Domains checked</div>
-        <div id="countDomains" class="big">0</div>
-      </div>
-
-      <div class="card">
-        <div class="muted">Verified (folder: Verified)</div>
-        <div id="countVerified" class="big">0</div>
-      </div>
-
+      <div class="card"><div class="muted">Uploaded+Pasted</div><div id="countUploaded" class="big">0</div></div>
+      <div class="card"><div class="muted">Filtered</div><div id="countFiltered" class="big">0</div></div>
+      <div class="card"><div class="muted">Domains</div><div id="countDomains" class="big">0</div></div>
+      <div class="card"><div class="muted">Verified</div><div id="countVerified" class="big">0</div></div>
       <div style="flex-basis:100%"></div>
-
       <div style="width:100%" class="card">
         <div class="muted">Progress</div>
-        <div class="progressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-          <i id="progressFill"></i>
-        </div>
-        <div class="muted small" style="margin-top:8px" id="progressText">Idle</div>
+        <div class="progressbar"><i id="progressFill"></i></div>
+        <div id="progressText" class="muted" style="margin-top:6px">Idle</div>
       </div>
     </div>
-
-    <footer>
-      <div class="small muted">How it works: uploads → filter out Gmail / Google / G Suite / Microsoft / Office365 domains → dedupe domains → DNS MX lookup via DoH → collect emails whose domain has MX → add to Verified folder → download as .txt. No email addresses are shown on-screen.</div>
-    </footer>
   </div>
 
 <script>
-/*
-  Email Verifier — single-file client-side app
-  - Parses uploaded file
-  - Filters google/microsoft providers
-  - Uses DNS-over-HTTPS to check MX records (no SMTP probing)
-  - Produces a "Verified" list and exports as .txt
-  - Does NOT display the emails on the page
-*/
-
 (function(){
-  // UI elements
-  const fileInput = document.getElementById('fileInput');
-  const startBtn = document.getElementById('startBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const countUploaded = document.getElementById('countUploaded');
-  const countFiltered = document.getElementById('countFiltered');
-  const countDomains = document.getElementById('countDomains');
-  const countVerified = document.getElementById('countVerified');
-  const progressFill = document.getElementById('progressFill');
-  const progressText = document.getElementById('progressText');
+  const fileInput=document.getElementById('fileInput');
+  const pasteBox=document.getElementById('pasteBox');
+  const startBtn=document.getElementById('startBtn');
+  const downloadBtn=document.getElementById('downloadBtn');
+  const countUploaded=document.getElementById('countUploaded');
+  const countFiltered=document.getElementById('countFiltered');
+  const countDomains=document.getElementById('countDomains');
+  const countVerified=document.getElementById('countVerified');
+  const progressFill=document.getElementById('progressFill');
+  const progressText=document.getElementById('progressText');
 
-  let uploadedEmails = [];        // all parsed emails
-  let filteredEmails = [];        // after removing google/microsoft
-  let verifiedEmails = [];        // final verified list (emails)
-  let domainToEmails = {};        // mapping domain -> [emails]
-  let domainStatus = {};          // domain -> {checked:bool, mxFound:bool}
+  let uploadedEmails=[]; let verifiedEmails=[];
 
-  // Providers filters (user requested)
-  const googlePatterns = [/\\bgmail\\b/i, /google/i, /gsuite/i, /googlemail/i];
-  const microsoftPatterns = [/microsoft/i, /office365/i, /outlook/i, /hotmail/i, /live\\.com/i, /msn\\.com/i];
-  // Combine to a single filter function
-  function isGoogleOrMicrosoftDomain(domain){
-    const d = domain.toLowerCase();
-    for(const p of googlePatterns) if(p.test(d)) return true;
-    for(const p of microsoftPatterns) if(p.test(d)) return true;
-    return false;
-  }
-
-  // Simple email validator (captures common emails)
   function extractEmails(text){
-    // match simple emails; will capture most standard forms
-    const re = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;
-    const found = text.match(re) || [];
-    return found.map(e => e.trim().toLowerCase());
+    const re=/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;
+    return (text.match(re)||[]).map(e=>e.toLowerCase());
   }
 
-  // Read file
-  fileInput.addEventListener('change', (ev)=>{
-    const file = ev.target.files && ev.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e){
-      const txt = e.target.result || '';
-      const emails = extractEmails(txt);
-      uploadedEmails = Array.from(new Set(emails)); // dedupe
-      // Reset counts / state
-      filteredEmails = [];
-      verifiedEmails = [];
-      domainToEmails = {};
-      domainStatus = {};
-      updateCounts();
-      progressText.textContent = `Loaded ${uploadedEmails.length} addresses. Ready.`;
-      downloadBtn.disabled = true;
-    }
-    reader.readAsText(file);
+  const google=/gmail|google|gsuite|googlemail/i;
+  const microsoft=/microsoft|office365|outlook|hotmail|live\\.com|msn\\.com/i;
+  function isBadDomain(d){return google.test(d)||microsoft.test(d)}
+
+  fileInput.addEventListener('change',e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      uploadedEmails=extractEmails(ev.target.result||"");
+      countUploaded.textContent=uploadedEmails.length;
+    };
+    r.readAsText(f);
   });
 
-  // Start verification
-  startBtn.addEventListener('click', async ()=>{
-    if(uploadedEmails.length === 0){
-      alert('Please upload a text file with emails (one per line or separated).');
-      return;
-    }
+  startBtn.addEventListener('click',async()=>{
+    let pasted=extractEmails(pasteBox.value);
+    let all=new Set([...(uploadedEmails||[]),...pasted]);
+    let arr=[...all];
+    countUploaded.textContent=arr.length;
 
-    // 1) Filter out Google & Microsoft provider emails
-    filteredEmails = uploadedEmails.filter(e => {
-      const domain = e.split('@')[1] || '';
-      return !isGoogleOrMicrosoftDomain(domain);
-    });
-    countFiltered.textContent = filteredEmails.length;
+    // Filter
+    let filtered=arr.filter(e=>!isBadDomain(e.split('@')[1]));
+    countFiltered.textContent=filtered.length;
 
     // Build domain map
-    domainToEmails = {};
-    for(const e of filteredEmails){
-      const parts = e.split('@');
-      if(parts.length !== 2) continue;
-      const d = parts[1].toLowerCase();
-      domainToEmails[d] = domainToEmails[d] || [];
-      domainToEmails[d].push(e);
-      domainStatus[d] = {checked:false, mxFound:false};
-    }
-    const domains = Object.keys(domainToEmails);
-    countDomains.textContent = domains.length;
-    countUploaded.textContent = uploadedEmails.length;
+    let domainMap={};
+    filtered.forEach(e=>{
+      let d=e.split('@')[1];
+      if(!d) return;
+      (domainMap[d]=domainMap[d]||[]).push(e);
+    });
+    let domains=Object.keys(domainMap);
+    countDomains.textContent=domains.length;
 
-    if(domains.length === 0){
-      progressText.textContent = 'No domains to check after filtering.';
-      return;
-    }
-
-    // 2) Check MX via DNS-over-HTTPS (DoH). We'll try Google's DoH first, then Cloudflare fallback.
-    // Use a small concurrency limit to avoid flooding DoH endpoints.
-    const concurrency = 6;
-    let idx = 0;
-    let completed = 0;
-
-    progressText.textContent = `Checking MX for ${domains.length} domains...`;
-    updateProgress(0);
-
-    // Helper to query MX using a DoH endpoint (returns true if MX records found)
-    async function queryMX(domain){
-      // Try google DoH first
-      const enc = encodeURIComponent(domain);
-      const urls = [
-        `https://dns.google/resolve?name=${enc}&type=15`,                 // MX
-        `https://cloudflare-dns.com/dns-query?name=${enc}&type=15`       // MX (Cloudflare)
+    verifiedEmails=[];
+    let done=0;
+    async function checkMX(d){
+      let ok=false;
+      const urls=[
+        `https://dns.google/resolve?name=${encodeURIComponent(d)}&type=15`,
+        `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(d)}&type=15`
       ];
-
-      for(const url of urls){
+      for(const u of urls){
         try{
-          const res = await fetch(url, {method:'GET', headers:{'Accept':'application/dns-json'}});
-          if(!res.ok) continue;
-          const j = await res.json();
-          // success codes: answer array with MX records (type 15)
-          if(j && Array.isArray(j.Answer) && j.Answer.length>0){
-            // Some answers may have other types; treat as found if any
-            return true;
-          }
-          // Some resolvers return 'Answer' missing but 'Authority' or 'Comment' — treat as no MX
-        }catch(err){
-          // ignore and continue to next DoH provider
-          console.debug('DoH query failed for', domain, err);
-        }
+          let res=await fetch(u,{headers:{Accept:"application/dns-json"}});
+          let j=await res.json();
+          if(j.Answer){ok=true;break;}
+        }catch{}
       }
-      return false;
+      if(ok) verifiedEmails.push(...domainMap[d]);
+      done++; 
+      progressFill.style.width=((done/domains.length)*100)+"%";
+      progressText.textContent=`Checked ${done}/${domains.length}`;
     }
 
-    async function worker(){
-      while(true){
-        let i;
-        // lock-free increment
-        if(idx >= domains.length) break;
-        i = idx++;
-        const domain = domains[i];
-        try{
-          const mx = await queryMX(domain);
-          domainStatus[domain].checked = true;
-          domainStatus[domain].mxFound = !!mx;
-          if(mx){
-            // add all emails of this domain to verified list
-            verifiedEmails.push(...domainToEmails[domain]);
-          }
-        }catch(e){
-          domainStatus[domain].checked = true;
-          domainStatus[domain].mxFound = false;
-        } finally {
-          completed++;
-          updateProgress(Math.round((completed / domains.length) * 100));
-          progressText.textContent = `Checked ${completed} / ${domains.length} domains`;
-        }
-      }
-    }
+    for(const d of domains) await checkMX(d);
 
-    // Launch workers
-    const workers = [];
-    for(let w=0; w<concurrency; w++) workers.push(worker());
-    await Promise.all(workers);
-
-    // Deduplicate verifiedEmails
-    verifiedEmails = Array.from(new Set(verifiedEmails));
-    countVerified.textContent = verifiedEmails.length;
-    progressText.textContent = `Done — ${verifiedEmails.length} emails verified (in folder: Verified).`;
-    downloadBtn.disabled = verifiedEmails.length === 0 ? true : false;
+    verifiedEmails=[...new Set(verifiedEmails)];
+    countVerified.textContent=verifiedEmails.length;
+    progressText.textContent="Done";
+    downloadBtn.disabled=verifiedEmails.length===0;
   });
 
-  // progress helper
-  function updateProgress(p){
-    progressFill.style.width = p + '%';
-    progressFill.parentElement.setAttribute('aria-valuenow', p);
-  }
-
-  // Download verified .txt (emails separated by newline)
-  downloadBtn.addEventListener('click', ()=>{
-    if(verifiedEmails.length === 0) return;
-    const blob = new Blob([verifiedEmails.join('\\n')], {type:'text/plain;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'verified_emails.txt';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+  downloadBtn.addEventListener('click',()=>{
+    const blob=new Blob([verifiedEmails.join("\\n")],{type:"text/plain"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download="verified_emails.txt";
+    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
   });
-
-  // Keyboard-friendly: allow drag/drop on the upload label
-  const uploadLabel = document.querySelector('label.upload');
-  ['dragenter','dragover'].forEach(ev => {
-    uploadLabel.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); uploadLabel.style.borderColor = 'rgba(255,255,255,0.18)'; });
-  });
-  ['dragleave','drop'].forEach(ev => {
-    uploadLabel.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); uploadLabel.style.borderColor = ''; });
-  });
-  uploadLabel.addEventListener('drop', (e)=>{
-    const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    if(f){
-      fileInput.files = e.dataTransfer.files;
-      const evt = new Event('change',{bubbles:true});
-      fileInput.dispatchEvent(evt);
-    }
-  });
-
 })();
 </script>
 </body>
