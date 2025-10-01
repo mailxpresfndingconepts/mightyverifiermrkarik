@@ -3,198 +3,87 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Email Verifier — Mr Karik</title>
+<title>Email Verifier</title>
 <style>
-  :root{
-    --bg:#0b0b0b;
-    --muted:#bdbdbd;
-    --accent:#7be0a6;
-  }
-  body{
-    background:#0b0b0b;
-    color:#fff;
-    margin:0;
-    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-    display:flex;
-    height:100vh;
-    overflow:hidden;
-  }
-  .sidebar{
-    width:280px;
-    background:#111;
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    border-right:1px solid rgba(255,255,255,0.08);
-  }
-  .sidebar h2{font-size:16px;margin:0 0 8px 0;}
-  textarea{
-    flex:1;
-    resize:none;
-    width:100%;
-    min-height:200px;
-    background:#0b0b0b;
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:8px;
-    padding:10px;
-    color:#fff;
-    font-family:monospace;
-    font-size:13px;
-  }
-  .app{
-    flex:1;
-    padding:24px;
-    display:flex;
-    flex-direction:column;
-    overflow-y:auto;
-  }
-  header{margin-bottom:18px;}
-  .title{font-size:20px;font-weight:700;}
-  .subtitle{color:var(--muted);font-size:13px;margin-top:4px;}
-  .controls{display:flex;gap:12px;align-items:center;margin:12px 0 18px;}
-  .btn{
-    background:transparent;border:1px solid rgba(255,255,255,0.08);
-    padding:10px 14px;border-radius:9px;color:#fff;font-weight:600;cursor:pointer;
-  }
-  .btn.primary{background:linear-gradient(90deg,#12c37a,#7be0a6);color:#021208;border:none;}
-  .info{color:var(--muted);font-size:12px;margin-left:auto}
-  .status{display:flex;gap:12px;flex-wrap:wrap}
-  .card{background:#111;padding:14px;border-radius:10px;min-width:140px;text-align:center}
+  body{margin:0;font-family:sans-serif;background:#0b0b0b;color:#fff;display:flex;height:100vh}
+  .sidebar{width:260px;background:#111;padding:14px;display:flex;flex-direction:column}
+  textarea{flex:1;resize:none;background:#000;color:#fff;border:1px solid #444;border-radius:6px;padding:8px;margin-top:8px}
+  .app{flex:1;padding:20px;overflow-y:auto}
+  .btn{padding:10px 16px;border-radius:6px;border:none;cursor:pointer;margin-right:10px}
+  .primary{background:#12c37a;color:#000}
+  .disabled{opacity:0.5;cursor:not-allowed}
+  .card{background:#111;padding:14px;border-radius:8px;display:inline-block;margin:6px;text-align:center}
   .big{font-size:20px;font-weight:700}
-  .muted{color:var(--muted);font-size:13px}
-  .progressbar{height:12px;background:rgba(255,255,255,0.04);border-radius:8px;overflow:hidden;margin-top:6px}
-  .progressbar > i{display:block;height:100%;background:linear-gradient(90deg,#12c37a,#7be0a6);width:0%}
+  .muted{font-size:12px;color:#aaa}
+  .progressbar{width:100%;height:10px;background:#222;border-radius:6px;margin-top:6px}
+  .progressbar > div{height:100%;width:0;background:linear-gradient(90deg,#12c37a,#7be0a6);border-radius:6px}
 </style>
 </head>
 <body>
-  <!-- Sidebar for manual paste -->
-  <aside class="sidebar">
-    <h2>Paste Emails</h2>
-    <textarea id="pasteBox" placeholder="Paste emails here (one per line)..."></textarea>
-    <small style="color:var(--muted)">These will be combined with uploaded list.</small>
-  </aside>
-
-  <!-- Main app -->
+  <div class="sidebar">
+    <h3>Paste Emails</h3>
+    <textarea id="pasteBox" placeholder="Paste one email per line..."></textarea>
+  </div>
   <div class="app">
-    <header>
-      <div class="title">Email Verifier</div>
-      <div class="subtitle">Upload list + Paste emails • Filters Google/Microsoft • Exports verified .txt</div>
-    </header>
-
-    <div class="controls">
-      <label class="btn">
-        <input id="fileInput" type="file" accept=".txt" style="display:none">📁 Upload list
-      </label>
+    <h1>Email Verifier</h1>
+    <div>
+      <input id="fileInput" type="file" accept=".txt" />
       <button id="startBtn" class="btn primary">Start Verification</button>
       <button id="downloadBtn" class="btn" disabled>Download Verified (.txt)</button>
-      <div class="info">Uses DNS-over-HTTPS MX checks</div>
     </div>
-
-    <div class="status">
-      <div class="card"><div class="muted">Uploaded+Pasted</div><div id="countUploaded" class="big">0</div></div>
+    <div id="statusArea">
+      <div class="card"><div class="muted">Total</div><div id="countUploaded" class="big">0</div></div>
       <div class="card"><div class="muted">Filtered</div><div id="countFiltered" class="big">0</div></div>
-      <div class="card"><div class="muted">Domains</div><div id="countDomains" class="big">0</div></div>
       <div class="card"><div class="muted">Verified</div><div id="countVerified" class="big">0</div></div>
-      <div style="flex-basis:100%"></div>
-      <div style="width:100%" class="card">
-        <div class="muted">Progress</div>
-        <div class="progressbar"><i id="progressFill"></i></div>
-        <div id="progressText" class="muted" style="margin-top:6px">Idle</div>
-      </div>
     </div>
+    <div class="progressbar"><div id="progressFill"></div></div>
+    <div class="muted" id="progressText">Idle</div>
   </div>
 
 <script>
-(function(){
-  const fileInput=document.getElementById('fileInput');
-  const pasteBox=document.getElementById('pasteBox');
-  const startBtn=document.getElementById('startBtn');
-  const downloadBtn=document.getElementById('downloadBtn');
-  const countUploaded=document.getElementById('countUploaded');
-  const countFiltered=document.getElementById('countFiltered');
-  const countDomains=document.getElementById('countDomains');
-  const countVerified=document.getElementById('countVerified');
-  const progressFill=document.getElementById('progressFill');
-  const progressText=document.getElementById('progressText');
+let uploadedEmails=[],verifiedEmails=[];
 
-  let uploadedEmails=[]; let verifiedEmails=[];
+function extractEmails(text){
+  return (text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g)||[]).map(e=>e.toLowerCase());
+}
 
-  function extractEmails(text){
-    const re=/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;
-    return (text.match(re)||[]).map(e=>e.toLowerCase());
-  }
+document.getElementById("fileInput").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    uploadedEmails=extractEmails(ev.target.result||"");
+    document.getElementById("countUploaded").textContent=uploadedEmails.length;
+  };
+  r.readAsText(f);
+});
 
-  const google=/gmail|google|gsuite|googlemail/i;
-  const microsoft=/microsoft|office365|outlook|hotmail|live\\.com|msn\\.com/i;
-  function isBadDomain(d){return google.test(d)||microsoft.test(d)}
+document.getElementById("startBtn").addEventListener("click",async()=>{
+  const pasted=extractEmails(document.getElementById("pasteBox").value);
+  let all=[...new Set([...uploadedEmails,...pasted])];
 
-  fileInput.addEventListener('change',e=>{
-    const f=e.target.files[0]; if(!f) return;
-    const r=new FileReader();
-    r.onload=ev=>{
-      uploadedEmails=extractEmails(ev.target.result||"");
-      countUploaded.textContent=uploadedEmails.length;
-    };
-    r.readAsText(f);
-  });
+  document.getElementById("countUploaded").textContent=all.length;
+  document.getElementById("progressText").textContent="Sending to server...";
+  document.getElementById("progressFill").style.width="20%";
 
-  startBtn.addEventListener('click',async()=>{
-    let pasted=extractEmails(pasteBox.value);
-    let all=new Set([...(uploadedEmails||[]),...pasted]);
-    let arr=[...all];
-    countUploaded.textContent=arr.length;
+  let res=await fetch("/api/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({emails:all})});
+  let data=await res.json();
 
-    // Filter
-    let filtered=arr.filter(e=>!isBadDomain(e.split('@')[1]));
-    countFiltered.textContent=filtered.length;
+  document.getElementById("countFiltered").textContent=data.filteredCount;
+  document.getElementById("countVerified").textContent=data.verified.length;
+  document.getElementById("progressFill").style.width="100%";
+  document.getElementById("progressText").textContent="Done";
 
-    // Build domain map
-    let domainMap={};
-    filtered.forEach(e=>{
-      let d=e.split('@')[1];
-      if(!d) return;
-      (domainMap[d]=domainMap[d]||[]).push(e);
-    });
-    let domains=Object.keys(domainMap);
-    countDomains.textContent=domains.length;
+  verifiedEmails=data.verified;
+  document.getElementById("downloadBtn").disabled=verifiedEmails.length===0;
+});
 
-    verifiedEmails=[];
-    let done=0;
-    async function checkMX(d){
-      let ok=false;
-      const urls=[
-        `https://dns.google/resolve?name=${encodeURIComponent(d)}&type=15`,
-        `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(d)}&type=15`
-      ];
-      for(const u of urls){
-        try{
-          let res=await fetch(u,{headers:{Accept:"application/dns-json"}});
-          let j=await res.json();
-          if(j.Answer){ok=true;break;}
-        }catch{}
-      }
-      if(ok) verifiedEmails.push(...domainMap[d]);
-      done++; 
-      progressFill.style.width=((done/domains.length)*100)+"%";
-      progressText.textContent=`Checked ${done}/${domains.length}`;
-    }
-
-    for(const d of domains) await checkMX(d);
-
-    verifiedEmails=[...new Set(verifiedEmails)];
-    countVerified.textContent=verifiedEmails.length;
-    progressText.textContent="Done";
-    downloadBtn.disabled=verifiedEmails.length===0;
-  });
-
-  downloadBtn.addEventListener('click',()=>{
-    const blob=new Blob([verifiedEmails.join("\\n")],{type:"text/plain"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");a.href=url;a.download="verified_emails.txt";
-    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-  });
-})();
+document.getElementById("downloadBtn").addEventListener("click",()=>{
+  const blob=new Blob([verifiedEmails.join("\n")],{type:"text/plain"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="verified_emails.txt";a.click();
+  URL.revokeObjectURL(url);
+});
 </script>
 </body>
 </html>
